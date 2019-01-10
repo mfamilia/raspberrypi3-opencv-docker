@@ -1,17 +1,17 @@
 #!/bin/bash
 
-OPENCV_VERSION=3.1.0
+OPENCV_VERSION=4.0.0
 
 WS_DIR=`pwd`
 mkdir opencv
 cd opencv
 
 # download OpenCV and opencv_contrib
-wget -O opencv.zip https://github.com/Itseez/opencv/archive/$OPENCV_VERSION.zip
+wget -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip
 unzip opencv.zip
 rm -rf opencv.zip
 
-wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/$OPENCV_VERSION.zip
+wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/$OPENCV_VERSION.zip
 unzip opencv_contrib.zip
 rm -rf opencv_contrib.zip
 
@@ -23,11 +23,13 @@ cd $OPENCV_SRC_DIR
 mkdir build && cd build
 cmake -D CMAKE_BUILD_TYPE=RELEASE \
   -D CMAKE_INSTALL_PREFIX=/usr/local \
-  -D INSTALL_PYTHON_EXAMPLES=ON \
   -D OPENCV_EXTRA_MODULES_PATH=$OPENCV_CONTRIB_MODULES_SRC_DIR \
+  -D OPENCV_PYTHON2_INSTALL_PATH=/usr/local/lib/python3.6/site-packages/ \
+  -D WITH_INF_ENGINE=ON \
+  -D ENABLE_CXX11=ON \
   ..
 
-make -j4			
+make -j4
 
 make install
 ldconfig
@@ -38,7 +40,7 @@ if [ $? -eq 0 ]; then
     echo "OpenCV installed successfully! ........................."
 else
     echo "OpenCV installation failed :( ........................."
-    SITE_PACKAGES_DIR=/usr/local/lib/python2.7/site-packages
+    SITE_PACKAGES_DIR=/usr/local/lib/python3.6/site-packages
     echo "$SITE_PACKAGES_DIR contents: "
     echo `ls -ltrh $SITE_PACKAGES_DIR`
     echo "Note: temporary installation dir $WS_DIR/opencv is not removed!"
