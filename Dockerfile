@@ -1,7 +1,5 @@
 FROM resin/raspberrypi3-python:3.6
 
-RUN cwd=$(pwd)
-
 # Install dependencies needed for building and running OpenCV
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # to build and install
@@ -14,9 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libavcodec-dev libavformat-dev libswscale-dev \
     libxine2-dev libv4l-dev
 
+ARG OPENCV_VERSION=4.0.0
+
 RUN cd /usr/include/linux && \
-    sudo ln -s -f ../libv4l1-videodev.h videodev.h && \
-    cd $cwd
+    sudo ln -s -f ../libv4l1-videodev.h videodev.h
 
 RUN apt-get install -y --no-install-recommends \
     libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev \
@@ -49,6 +48,18 @@ RUN pip install --no-cache-dir \
     && cd / \
     && rm -rf /usr/src/python ~/.cache
 
-# Install OpenCV
-COPY download_build_install_opencv.sh download_build_install_opencv.sh
-RUN ./download_build_install_opencv.sh
+RUN mkdir opencv && cd opencv
+WORKDIR /opencv
+
+COPY download.sh download.sh
+RUN ./download.sh
+COPY configure.sh configure.sh
+RUN ./configure.sh
+COPY build.sh build.sh
+RUN ./build.sh
+COPY install.sh install.sh
+RUN ./install.sh
+COPY verify.sh verify.sh
+RUN ./verify.sh
+
+WORKDIR /
